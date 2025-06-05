@@ -151,3 +151,7 @@ fix-deps:
 	make clean
 	make init DEP_MANAGER=$(DEP_MANAGER)
 	@echo "✅ Fix-deps complete."
+
+.PHONY: scrape-data
+scrape:
+	python3 src/data/collect_reviews.py
