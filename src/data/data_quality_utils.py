@@ -1,6 +1,6 @@
 import asyncio
 import re
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 import emoji
 import nest_asyncio
