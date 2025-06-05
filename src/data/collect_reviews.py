@@ -7,7 +7,7 @@ from google_play_scraper import Sort, reviews
 
 
 class PlayStoreReviewScraper:
-    def __init__(self, app_id: str, bank_name: str, max_reviews: int = 500):
+    def __init__(self, app_id: str, bank_name: str, max_reviews: int = 1000):
         self.app_id = app_id
         self.bank_name = bank_name
         self.max_reviews = max_reviews
@@ -15,27 +15,37 @@ class PlayStoreReviewScraper:
     def fetch_reviews(self) -> pd.DataFrame:
         all_reviews = []
         count = 0
+        continuation_token = None
+
         try:
             while count < self.max_reviews:
                 try:
-                    rvws, _ = reviews(
+                    rvws, continuation_token = reviews(
                         self.app_id,
                         lang="en",
                         country="us",
                         sort=Sort.NEWEST,
                         count=min(200, self.max_reviews - count),
                         filter_score_with=None,
+                        continuation_token=continuation_token,  # 🔥 Add this!
                     )
                 except Exception as e:
                     print(f"[WARN] Retry due to error: {e}")
                     time.sleep(3)
                     continue
+
                 if not rvws:
                     break
+
                 all_reviews.extend(rvws)
                 count = len(all_reviews)
+
+                if continuation_token is None:
+                    break  # No more pages
+
         except Exception as e:
             print(f"[ERROR] Failed to fetch reviews for {self.bank_name}: {e}")
+
         return pd.DataFrame(all_reviews)
 
 
@@ -57,7 +67,7 @@ class ReviewPreprocessor:
 
 
 def scrape_all_banks(
-    app_dict: Dict[str, str], output_path: str, max_reviews: int = 500
+    app_dict: Dict[str, str], output_path: str, max_reviews: int = 1000
 ):
     all_dfs = []
     for bank, app_id in app_dict.items():
@@ -107,4 +117,4 @@ if __name__ == "__main__":
         "Dashen": "com.dashen.dashensuperapp",
     }
     OUTPUT_CSV = "data/processed/cleaned_reviews.csv"
-    scrape_all_banks(BANK_APPS, OUTPUT_CSV, max_reviews=500)
+    scrape_all_banks(BANK_APPS, OUTPUT_CSV, max_reviews=1000)
