@@ -1,6 +1,91 @@
-from typing import Optional
+import asyncio
+import re
+from typing import Optional, Dict, Any
 
+import emoji
+import nest_asyncio
 import pandas as pd
+from googletrans import Translator
+from langdetect import LangDetectException, detect
+
+nest_asyncio.apply()
+
+# Define the default emoji map as a constant outside the function
+DEFAULT_EMOJI_MAP: Dict[str, str] = {
+    "😀": " happy ",
+    "😃": " happy ",
+    "😄": " happy ",
+    "😁": " happy ",
+    "😆": " happy ",
+    "😅": " relieved ",
+    "😂": " joy ",
+    "🤣": " joy ",
+    "😊": " happy ",
+    "😇": " blessed ",
+    "🙂": " positive ",
+    "😉": " playful ",
+    "😍": " love ",
+    "😘": " love ",
+    "😗": " love ",
+    "😚": " love ",
+    "😙": " love ",
+    "😋": " tasty ",
+    "😜": " playful ",
+    "😝": " playful ",
+    "😛": " playful ",
+    "🤑": " greedy ",
+    "🤗": " hug ",
+    "🤔": " thinking ",
+    "😐": " neutral ",
+    "😑": " annoyed ",
+    "😶": " speechless ",
+    "🙄": " annoyed ",
+    "😏": " smug ",
+    "😣": " frustrated ",
+    "😥": " disappointed ",
+    "😮": " surprised ",
+    "🤐": " silent ",
+    "😯": " surprised ",
+    "😪": " sleepy ",
+    "😫": " tired ",
+    "😴": " sleeping ",
+    "😌": " relieved ",
+    "🤤": " drooling ",
+    "😒": " annoyed ",
+    "😓": " sweating ",
+    "😔": " sad ",
+    "😕": " confused ",
+    "🙃": " sarcastic ",
+    "😲": " shocked ",
+    "☹️": " sad ",
+    "🙁": " sad ",
+    "😖": " frustrated ",
+    "😞": " disappointed ",
+    "😟": " worried ",
+    "😤": " angry ",
+    "😢": " crying ",
+    "😭": " crying ",
+    "😦": " shocked ",
+    "😧": " shocked ",
+    "😨": " fearful ",
+    "😩": " weary ",
+    "🤯": " mind blown ",
+    "😬": " grimace ",
+    "😰": " anxious ",
+    "😱": " scared ",
+    "😳": " embarrassed ",
+    "🤪": " crazy ",
+    "😵": " dizzy ",
+    "😡": " angry ",
+    "😠": " angry ",
+    "🤬": " curse ",
+    "😷": " sick ",
+    "🤒": " sick ",
+    "🤕": " hurt ",
+    "🤢": " nauseous ",
+    "🤮": " vomiting ",
+    "🤧": " sneezing ",
+}
 
 
 class DataQualityUtils:
@@ -8,6 +93,7 @@ class DataQualityUtils:
         if not isinstance(df, pd.DataFrame):
             raise TypeError("Input must be a pandas DataFrame")
         self.df = df.copy()
+        self.translator = Translator()
 
     def clean_column_names(self):
         """
@@ -221,4 +307,188 @@ class DataQualityUtils:
         rest = [col for col in self.df.columns if col not in renamed_columns_order]
         self.df = self.df[renamed_columns_order + rest]
 
+        return self.df
+
+    def display_duplicates(self, keep: str = "first") -> pd.DataFrame:
+        """
+        Returns all duplicated rows in the DataFrame.
+
+        Args:
+            keep (str): Determines which duplicates to mark as True.
+                        Options: 'first', 'last', False.
+                        Default is 'first'.
+
+        Returns:
+            pd.DataFrame: DataFrame of duplicated rows.
+        """
+        duplicates = self.df[self.df.duplicated(keep=keep)]
+        print(f"[INFO] Found {len(duplicates)} duplicated row(s).")
+        return duplicates
+
+    def drop_duplicates(
+        self, keep: str = "first", inplace: bool = True
+    ) -> pd.DataFrame:
+        """
+        Drops duplicated rows from the DataFrame.
+
+        Args:
+            keep (str): Determines which duplicates to keep.
+                        Options: 'first', 'last', False.
+                        Default is 'first'.
+            inplace (bool): Whether to drop duplicates in place. If False,
+                            returns a new DataFrame without modifying internal state.
+
+        Returns:
+            pd.DataFrame: Updated DataFrame with duplicates removed.
+        """
+        before = len(self.df)
+        if inplace:
+            self.df.drop_duplicates(keep=keep, inplace=True)
+            after = len(self.df)
+            print(f"[INFO] Dropped {before - after} duplicate row(s).")
+            return self.df
+        else:
+            df_cleaned = self.df.drop_duplicates(keep=keep)
+            print(
+                f"[INFO] Dropped {before - len(df_cleaned)} "
+                f"duplicate row(s) (non-inplace)."
+            )
+            return df_cleaned
+
+    def drop_rows_with_missing_in_columns(self, columns: list[str]) -> pd.DataFrame:
+        """
+        Drops rows from the DataFrame where any value is missing (NaN)
+        in the specified columns.
+
+        Args:
+            columns (list[str]): List of column names to check for missing values.
+
+        Returns:
+            pd.DataFrame: The updated DataFrame with specified rows dropped.
+        """
+        if not columns:
+            print("[WARNING] No columns provided. No rows dropped.")
+            return self.df
+
+        missing_cols = [col for col in columns if col not in self.df.columns]
+        if missing_cols:
+            print(
+                f"[WARNING] The following columns were not found "
+                f"and ignored: {missing_cols}"
+            )
+            columns = [col for col in columns if col in self.df.columns]
+
+        if not columns:
+            print("[ERROR] None of the provided columns are valid. Aborting operation.")
+            return self.df
+
+        before_count = len(self.df)
+        self.df.dropna(subset=columns, inplace=True)
+        after_count = len(self.df)
+        dropped = before_count - after_count
+        print(
+            f"[INFO] Dropped {dropped} row(s) with missing values in columns: {columns}"
+        )
+        return self.df
+
+    def filter_english_text(self, text_column: str) -> pd.DataFrame:
+        """
+        Filters the DataFrame to keep only rows where the text in
+        `text_column` is detected as English.
+
+        Args:
+            text_column (str): Name of the column containing text to detect language.
+
+        Returns:
+            pd.DataFrame: Filtered DataFrame with only English text rows.
+        """
+        if text_column not in self.df.columns:
+            raise ValueError(f"Column '{text_column}' not found in DataFrame.")
+
+        def is_english(text):
+            try:
+                return detect(text) == "en"
+            except LangDetectException:
+                return False
+
+        mask = self.df[text_column].astype(str).apply(is_english)
+        filtered_df = self.df.loc[mask].copy()
+        dropped_count = len(self.df) - len(filtered_df)
+        print(
+            f"[INFO] Dropped {dropped_count} non-English rows "
+            f"from '{text_column}' column."
+        )
+        self.df = filtered_df
+        return self.df
+
+    def replace_emojis_with_text(
+        self, text_column: str, emoji_map: Optional[Dict[str, str]] = None
+    ) -> pd.DataFrame:
+        """
+        Replaces emojis in the specified text column with
+        sentiment-rich text equivalents.
+
+        Args:
+            text_column (str): Name of the column containing text with emojis.
+            emoji_map (dict, optional): Mapping of emojis to replacement words.
+                                        Defaults to common sentiment emojis.
+
+        Returns:
+            pd.DataFrame: DataFrame with emojis replaced in the specified column.
+        """
+        if text_column not in self.df.columns:
+            raise ValueError(f"Column '{text_column}' not found in DataFrame.")
+
+        if emoji_map is None:
+            emoji_map = DEFAULT_EMOJI_MAP
+
+        emoji_map_safe: Dict[str, str] = emoji_map  # Ensures mypy compliance
+
+        def replace_emojis(text: Any) -> Any:
+            if not isinstance(text, str):
+                return text
+            for emj, repl in emoji_map_safe.items():
+                text = text.replace(emj, repl)
+            text = emoji.replace_emoji(text, replace="")
+            text = re.sub(r"\s+", " ", text).strip()
+            return text
+
+        self.df[text_column] = self.df[text_column].apply(replace_emojis)
+        print(
+            f"[INFO] Replaced emojis with text equivalents in '{text_column}' column."
+        )
+        return self.df
+
+    async def translate_to_english(self, text):
+        try:
+            lang = detect(text)
+        except LangDetectException:
+            return text
+
+        if lang != "en":
+            try:
+                translated = await self.translator.translate(text, src=lang, dest="en")
+                return translated.text
+            except Exception as e:
+                print(f"[WARN] Translation failed: {e}")
+                return text
+        else:
+            return text
+
+    async def translate_non_english_text(self, text_column):
+        if text_column not in self.df.columns:
+            raise ValueError(f"Column '{text_column}' not found in DataFrame.")
+
+        # Apply async function row-wise (needs some trick)
+        import nest_asyncio
+
+        nest_asyncio.apply()
+
+        async def apply_async():
+            return await asyncio.gather(
+                *[self.translate_to_english(str(t)) for t in self.df[text_column]]
+            )
+
+        translations = asyncio.run(apply_async())
+        self.df[text_column] = translations
         return self.df
