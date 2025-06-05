@@ -55,7 +55,6 @@ test-results/
 *.err
 
 # Data files
-data/
 *.csv
 *.tsv
 *.parquet
