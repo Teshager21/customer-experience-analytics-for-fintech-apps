@@ -13,8 +13,9 @@ def assign_themes(keywords):
 
     assigned_themes = set()
     for kw in keywords:
+        kw_lower = kw.lower()
         for key, theme in keyword_theme_map.items():
-            if key in kw:
+            if key in kw_lower:
                 assigned_themes.add(theme)
 
     return list(assigned_themes) if assigned_themes else ["Miscellaneous"]
