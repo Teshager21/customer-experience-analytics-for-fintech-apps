@@ -2,7 +2,7 @@ import pandas as pd
 from pathlib import Path
 
 from data.text_cleaning import preprocess_reviews
-from models.sentiment_model import analyze_sentiment
+from models.sentiment_model import safe_analyze_sentiment
 from features.keyword_extraction import extract_keywords
 from features.theme_clustering import assign_themes
 
@@ -18,7 +18,7 @@ def run_pipeline(input_csv: str, output_csv: str):
     df["cleaned_text"] = df["review_text"].apply(preprocess_reviews)
 
     print("🧠 Performing sentiment analysis with DistilBERT...")
-    sentiment_results = df["cleaned_text"].apply(analyze_sentiment)
+    sentiment_results = df["cleaned_text"].apply(safe_analyze_sentiment)
     df[["sentiment_label", "sentiment_score"]] = pd.DataFrame(
         sentiment_results.tolist(), index=df.index
     )
