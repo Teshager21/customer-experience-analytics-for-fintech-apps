@@ -155,3 +155,8 @@ fix-deps:
 .PHONY: scrape-data
 scrape:
 	python3 src/data/collect_reviews.py
+
+.PHONY: run sentiment pipeline
+run-sentiment-pipeline:
+	@echo "🔁 Running sentiment and thematic pipeline..."
+	python3 src/pipeline/sentiment_thematic_pipeline.py
