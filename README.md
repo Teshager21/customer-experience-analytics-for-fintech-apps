@@ -1,92 +1,113 @@
-# customer-experience-analytics-for-fintech-apps
-> A production-grade, end-to-end Data Science project scaffold.
 
-## 🚀 Overview
+# Sentiment and Thematic Analysis Pipeline
 
-Welcome to **customer-experience-analytics-for-fintech-apps**
+## Overview
 
-## 🛠️ Getting Started
+This project provides a comprehensive pipeline for sentiment and thematic analysis on textual review data. It includes data preprocessing, emoji removal, language translation, sentiment analysis using DistilBERT, keyword extraction, and theme clustering.
 
-### 1. Install Dependencies
+---
+
+## 🛠️ Installation
+
+Clone the repository and initialize the environment with all dependencies and models:
 
 ```bash
+git clone https://github.com/your-org/your-project.git
+cd your-project
 make init
 ```
 
-### 2. Docker (Optional)
+---
 
-Build and run using Docker:
+## ▶️ Usage
+
+Run the full sentiment and thematic analysis pipeline on your data:
 
 ```bash
-docker build -t customer-experience-analytics-for-fintech-apps .
-docker run -p 8000:8000 customer-experience-analytics-for-fintech-apps
+make run-sentiment-pipeline
 ```
+
+This will:
+
+- Load and preprocess data (including emoji removal and text normalization)
+- Translate non-English text to English
+- Perform sentiment analysis
+- Extract keywords
+- Assign themes based on keyword clustering
+- Save results to `data/outputs/sentiment_theme_output.csv`
+
+---
+
+## 🕸️ Scraping (Optional)
+
+If your workflow requires scraping review data:
+
+```bash
+make scrape
+```
+
+---
+
+## 🧪 Testing & Formatting
+
+Ensure code quality and correctness with:
+
+```bash
+make test
+make format
+```
+
+- `make test` runs the test suite.
+- `make format` auto-formats the code using Black and isort.
+
+---
 
 ## 📁 Project Structure
 
-```
-customer-experience-analytics-for-fintech-apps/
-├── CHANGELOG.md
-├── CODE_OF_CONDUCT.md
-├── config
-│   ├── base.yaml
-│   ├── dev.yaml
-│   └── prod.yaml
-├── CONTRIBUTING.md
-├── data
-│   ├── external
-│   ├── interim
-│   ├── processed
-│   └── raw
-├── dev-requirements.txt
-├── docker-compose.yml
-├── Dockerfile
-├── environment.yml
-├── LICENSE
-├── Makefile
-├── models
-├── notebooks
-│   ├── exploratory
-│   └── reports
-├── README.md
-├── reports
-│   └── figures
-├── requirements.txt
-├── SECURITY.md
-├── setup.py
-├── src
-│   ├── data
-│   │   └── make_dataset.py
-│   ├── features
-│   │   └── build_features.py
-│   ├── __init__.py
-│   ├── models
-│   │   └── train_model.py
-│   ├── utils
-│   │   └── helpers.py
-│   └── visualization
-│       └── visualize.py
-└── tests
-    ├── conftest.py
-    ├── data
-    ├── features
-    ├── __init__.py
-    ├── models
-    ├── test_placeholder.py
-    ├── utils
-    └── visualization
+- `data/`: Contains raw, processed, and output datasets.
+- `data/text_cleaning.py`: Text preprocessing and emoji removal methods.
+- `models/`: Sentiment analysis models.
+- `features/`: Keyword extraction and theme clustering logic.
+- `Makefile`: Automates common tasks (`init`, `test`, `format`, `scrape`, `run-sentiment-pipeline`).
 
+---
 
-```
+## 🚀 Quick Start
 
-## ✅ Features
+1. Clone repo and initialize:
 
-- Clean, modular structure
+    ```bash
+    git clone <repo-url>
+    cd your-project
+    make init
+    ```
 
+2. Run the pipeline:
 
-- Docker for reproducible environments
-- GitHub Actions CI/CD pipeline
+    ```bash
+    make run-sentiment-pipeline
+    ```
 
-## 📜 License
+3. Check results in:
 
-Distributed under the **MIT** License. See `LICENSE` for more information.
+    ```
+    data/outputs/sentiment_theme_output.csv
+    ```
+
+---
+
+## 📝 Notes
+
+- The pipeline expects input CSV with a `review` column.
+- Emoji removal is done in preprocessing to improve analysis quality.
+- Non-English texts are translated automatically.
+- Sentiment analysis uses DistilBERT with fallback for errors.
+- Keyword extraction and theme assignment help uncover key topics.
+
+---
+
+## 🧑‍💻 Contact
+
+For questions or contributions, please open an issue or reach out to the maintainers.
+
+---

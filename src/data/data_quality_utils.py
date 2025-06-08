@@ -6,86 +6,12 @@ import emoji
 import nest_asyncio
 import pandas as pd
 from googletrans import Translator
-from langdetect import LangDetectException, detect
+from langdetect import detect
+from langdetect.lang_detect_exception import LangDetectException
+from utils.emoji_map import DEFAULT_EMOJI_MAP
+
 
 nest_asyncio.apply()
-
-# Define the default emoji map as a constant outside the function
-DEFAULT_EMOJI_MAP: Dict[str, str] = {
-    "😀": " happy ",
-    "😃": " happy ",
-    "😄": " happy ",
-    "😁": " happy ",
-    "😆": " happy ",
-    "😅": " relieved ",
-    "😂": " joy ",
-    "🤣": " joy ",
-    "😊": " happy ",
-    "😇": " blessed ",
-    "🙂": " positive ",
-    "😉": " playful ",
-    "😍": " love ",
-    "😘": " love ",
-    "😗": " love ",
-    "😚": " love ",
-    "😙": " love ",
-    "😋": " tasty ",
-    "😜": " playful ",
-    "😝": " playful ",
-    "😛": " playful ",
-    "🤑": " greedy ",
-    "🤗": " hug ",
-    "🤔": " thinking ",
-    "😐": " neutral ",
-    "😑": " annoyed ",
-    "😶": " speechless ",
-    "🙄": " annoyed ",
-    "😏": " smug ",
-    "😣": " frustrated ",
-    "😥": " disappointed ",
-    "😮": " surprised ",
-    "🤐": " silent ",
-    "😯": " surprised ",
-    "😪": " sleepy ",
-    "😫": " tired ",
-    "😴": " sleeping ",
-    "😌": " relieved ",
-    "🤤": " drooling ",
-    "😒": " annoyed ",
-    "😓": " sweating ",
-    "😔": " sad ",
-    "😕": " confused ",
-    "🙃": " sarcastic ",
-    "😲": " shocked ",
-    "☹️": " sad ",
-    "🙁": " sad ",
-    "😖": " frustrated ",
-    "😞": " disappointed ",
-    "😟": " worried ",
-    "😤": " angry ",
-    "😢": " crying ",
-    "😭": " crying ",
-    "😦": " shocked ",
-    "😧": " shocked ",
-    "😨": " fearful ",
-    "😩": " weary ",
-    "🤯": " mind blown ",
-    "😬": " grimace ",
-    "😰": " anxious ",
-    "😱": " scared ",
-    "😳": " embarrassed ",
-    "🤪": " crazy ",
-    "😵": " dizzy ",
-    "😡": " angry ",
-    "😠": " angry ",
-    "🤬": " curse ",
-    "😷": " sick ",
-    "🤒": " sick ",
-    "🤕": " hurt ",
-    "🤢": " nauseous ",
-    "🤮": " vomiting ",
-    "🤧": " sneezing ",
-}
 
 
 class DataQualityUtils:

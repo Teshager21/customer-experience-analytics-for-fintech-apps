@@ -5,6 +5,7 @@ from data.text_cleaning import preprocess_reviews
 from models.sentiment_model import safe_analyze_sentiment
 from features.keyword_extraction import extract_keywords
 from features.theme_clustering import assign_themes
+from data.data_quality_utils import DataQualityUtils
 
 
 def run_pipeline(input_csv: str, output_csv: str):
@@ -16,6 +17,9 @@ def run_pipeline(input_csv: str, output_csv: str):
 
     print("🧹 Preprocessing review text...")
     df["cleaned_text"] = df["review_text"].apply(preprocess_reviews)
+    df = df[df["cleaned_text"].str.strip() != ""]
+    dq = DataQualityUtils(df)
+    df = dq.replace_emojis_with_text("cleaned_text")
 
     print("🧠 Performing sentiment analysis with DistilBERT...")
     sentiment_results = df["cleaned_text"].apply(safe_analyze_sentiment)
