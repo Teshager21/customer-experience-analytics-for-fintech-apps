@@ -27,6 +27,7 @@ env/
 ENV/
 env.bak/
 *.envrc
+!.env.example
 
 # Jupyter Notebook Checkpoints
 .ipynb_checkpoints

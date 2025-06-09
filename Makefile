@@ -160,3 +160,12 @@ scrape:
 run-sentiment-pipeline:
 	@echo "🔁 Running sentiment and thematic pipeline..."
 	python3 src/pipeline/sentiment_thematic_pipeline.py
+
+.PHONY: init-db seed-db
+
+init-db:
+	@echo "Initializing Oracle DB schema..."
+	python3 db/init_db.py
+seed-db:
+	@echo "Seeding Oracle DB with review data..."
+	python3 db/seed_reviews.py
