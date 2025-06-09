@@ -160,3 +160,9 @@ scrape:
 run-sentiment-pipeline:
 	@echo "🔁 Running sentiment and thematic pipeline..."
 	python3 src/pipeline/sentiment_thematic_pipeline.py
+
+.PHONY: init-db
+
+init-db:
+	@echo "Initializing Oracle DB schema..."
+	python3 db/init_db.py
