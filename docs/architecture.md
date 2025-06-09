@@ -19,16 +19,16 @@ Scrape, analyze, and visualize customer reviews from the Google Play Store for t
                   └─────────┬───────────────┘
                             │
                             ▼
-        ┌───────────────────────────────────────┐
-        │ Preprocessing & Cleaning              │
-        │ - Remove duplicates, normalize dates  │
-        │ - Handle missing values               │
-        │ Output: data/processed/cleaned_reviews.csv │
-        └────────────────┬──────────────────────┘
+        ┌─────────────────────────────────────────────┐
+        │ Preprocessing & Cleaning                    │
+        │ - Remove duplicates, normalize dates        │
+        │ - Handle missing values                     │
+        │ Output: data/processed/cleaned_reviews.csv  │
+        └────────────────┬────────────────────────────┘
                          │
                          ▼
-    ┌────────────────────────────────────────────────┐
-    │ Sentiment & Thematic Analysis                  │
+    ┌───────────────────────────────────────────────┐
+    │ Sentiment & Thematic Analysis                 │
     │ - VADER or DistilBERT                         │
     │ - TF-IDF, spaCy, or topic modeling            │
     │ Output: sentiment_scores.csv, themes.csv      │
